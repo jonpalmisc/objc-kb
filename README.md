@@ -68,3 +68,23 @@ resulting pointer can be **absolute** or **relative**.
 ### Fast pointers
 
 TODO
+
+## Types and structures
+
+TODO
+
+### Class metadata
+
+TODO
+
+### Classes
+
+TODO
+
+### Method lists
+
+TODO
+
+#### Entry types
+
+TODO
