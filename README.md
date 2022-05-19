@@ -9,7 +9,23 @@ encouraged.
 ## Pointer Types
 
 The Objective-C ABI utilizes numerous different encoding techniques for
-pointers.
+pointers. Different techniques are used depending on the part of the ABI in
+question, the architecture of the binary, and the OS version the binary was
+compiled for. Objective-C's internal structures make heavy use of (wacky)
+pointers, so understanding different pointer types is important before looking
+at structures in detail.
+
+The following table is a **rough outline** of how pointers are typically
+encoded, given an OS version and architecture:
+
+| OS        | Architecture | Tagged | Type     |
+|-----------|--------------|--------|----------|
+| macOS     | x86_64       | No     | Absolute |
+| macOS 11  | arm64e       | Yes    | Absolute |
+| macOS 12+ | arm64e       | Ye     | Relative |
+
+The table above is **not** all-encompassing and ignores certain scenarios; use
+this for a general understanding, not for writing tools.
 
 ### C-style (absolute) pointers
 
@@ -48,3 +64,7 @@ against `0x7ffffffff`.
 
 This illustrates an important point: even after removing the metadata, the
 resulting pointer can be **absolute** or **relative**.
+
+### Fast pointers
+
+TODO
