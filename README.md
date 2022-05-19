@@ -88,3 +88,19 @@ TODO
 #### Entry types
 
 TODO
+
+## Further reading
+
+Below are some resources and projects related to the Objective-C ABI that may be
+useful references.
+
+**Resources**
+
+- https://developpaper.com/in-depth-analysis-of-the-structure-of-the-method-in-objc/
+- https://www.fortinet.com/blog/threat-research/rewriting-idapython-script-objc2-xrefs-helper-py-for-hopper
+
+**Projects**
+
+- https://github.com/cxnder/ktool
+- https://github.com/blacktop/ipsw
+- https://github.com/jonpalmisc/ObjectiveNinja
