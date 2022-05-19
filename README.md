@@ -6,7 +6,7 @@ just my personal observations and notes. It is likely that there are errors
 and/or misunderstandings. Pull requests with corrections or new knowledge are
 encouraged.
 
-## Pointer Types
+## Pointer types
 
 The Objective-C ABI utilizes numerous different encoding techniques for
 pointers. Different techniques are used depending on the part of the ABI in
