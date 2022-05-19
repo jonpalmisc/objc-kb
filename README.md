@@ -13,13 +13,13 @@ pointers.
 
 ### C-style (absolute) pointers
 
-- Look like regular C pointers, nothing special going on
-- Most common in x86_64 binaries
+Regular, C-style pointers are sometimes used, but are becoming less common. They
+look like the following, and are only commonly used on x86_64:
 
-Some examples:
-
+```
 0x1000311a0
 0x100031240
+```
 
 ### Relative pointers
 
