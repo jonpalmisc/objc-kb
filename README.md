@@ -1,4 +1,4 @@
-# Objective-C ABI Knowldegebase
+# Objective-C ABI Knowledge Base
 
 This repository is meant to serve as a continuously-growing knowledge base
 regarding the Objective-C ABI. It is a **work in progress** and is currently
@@ -104,15 +104,18 @@ pointing into the middle of the following structure:
 100096d64     uint32_t start = 0x48
 100096d68     uint32_t size = 0x68
 100096d6c     uint32_t reserved = 0x0
-100096d70     struct tptr_t const ivar_layout = NULL
-100096d78     struct tptr_t const name = nm__TtC7Console21ReportsViewController
-100096d80     struct tptr_t const methods = ml__TtC7Console21ReportsViewController
-100096d88     struct tptr_t const protocols = NULL
-100096d90     struct tptr_t const vars = 0x10008c068
-100096d98     struct tptr_t const weak_ivar_layout = NULL
-100096da0     struct tptr_t const properties = 0x10008c0f0
+100096d70     void* ivar_layout = NULL
+100096d78     void* name = nm__TtC7Console21ReportsViewController
+100096d80     void* methods = ml__TtC7Console21ReportsViewController
+100096d88     void* protocols = NULL
+100096d90     void* vars = 0x10008c068
+100096d98     void* weak_ivar_layout = NULL
+100096da0     void* properties = 0x10008c0f0
 100096da8 }
 ```
+
+> The definition of this strucutre isn't really important here, but is used to
+> illustrate an example.
 
 After removing the flags in the two least significant bits, we get the correct
 pointer, which points to the structure's base:
