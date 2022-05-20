@@ -73,7 +73,53 @@ resulting pointer can be **absolute** or **image-relative**.
 
 ### Fast pointers
 
-Coming soon.
+_WARNING: This section is likely incomplete._
+
+**Fast pointers** are a type of pointer often used by Swift's ABI, which
+overlaps Objective-C's ABI. Fast pointers store metadata in the two least
+significant bits of the pointer. These two bits should be removed when
+attempting to dereference the pointer.
+
+Here is an example of a fast pointer, taken from the arm64e slice of the main
+binary of macOS 12's "Console.app":
+
+```
+0x20000000096d62
+```
+
+The pointer is fast, tagged, and relative. After removing the tags and adding
+the image base, the resulting pointer is produced:
+
+```
+0x100096d62
+```
+
+However, if we dereferenced this pointer as is, we would be (incorrectly)
+pointing into the middle of the following structure:
+
+```
+100096d60 struct objc_class_ro_t ro__TtC7Console21ReportsViewController =
+100096d60 {
+100096d60     uint32_t flags = 0x184
+100096d64     uint32_t start = 0x48
+100096d68     uint32_t size = 0x68
+100096d6c     uint32_t reserved = 0x0
+100096d70     struct tptr_t const ivar_layout = NULL
+100096d78     struct tptr_t const name = nm__TtC7Console21ReportsViewController
+100096d80     struct tptr_t const methods = ml__TtC7Console21ReportsViewController
+100096d88     struct tptr_t const protocols = NULL
+100096d90     struct tptr_t const vars = 0x10008c068
+100096d98     struct tptr_t const weak_ivar_layout = NULL
+100096da0     struct tptr_t const properties = 0x10008c0f0
+100096da8 }
+```
+
+After removing the flags in the two least significant bits, we get the correct
+pointer, which points to the structure's base:
+
+```
+0x100096d62 & (~0b11) = 0x100096d60
+```
 
 ## Types and structures
 
