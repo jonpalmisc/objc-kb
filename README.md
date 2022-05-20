@@ -6,6 +6,10 @@ just my personal observations and notes. It is likely that there are errors
 and/or misunderstandings. Pull requests with corrections or new knowledge are
 encouraged.
 
+NOTE: In examples where structures/types are shown, some fields have been
+renamed to more clearly indicate their purpose; field names shown do not always
+match Objective-C's source code or their canonical names.
+
 ## Pointer types
 
 The Objective-C ABI utilizes numerous different encoding techniques for
@@ -18,35 +22,37 @@ at structures in detail.
 The following table is a **rough outline** of how pointers are typically
 encoded, given an OS version and architecture:
 
-| OS        | Architecture | Tagged | Type     |
-|-----------|--------------|--------|----------|
-| macOS     | x86_64       | No     | Absolute |
-| macOS 11  | arm64e       | Yes    | Absolute |
-| macOS 12+ | arm64e       | Ye     | Relative |
+| OS        | Architecture | Tagged | Type           |
+|-----------|--------------|--------|----------------|
+| macOS     | x86_64       | No     | Absolute       |
+| macOS 11  | arm64        | Yes    | Absolute       |
+| macOS 12+ | arm64e       | Ye     | Image-relative |
 
 The table above is **not** all-encompassing and ignores certain scenarios; use
 this for a general understanding, not for writing tools.
 
-### C-style (absolute) pointers
+### Absolute (C-style) pointers
 
-Regular, C-style pointers are sometimes used, but are becoming less common. They
-look like the following, and are only commonly used on x86_64:
+Absolute (C-style) pointers are sometimes used, but are becoming less common.
+They look like "normal" pointers (shown below) and don't have any quirks. As of
+2022, absolute pointers are mostly only still used on x86_64.
 
 ```
 0x1000311a0
 0x100031240
 ```
 
-### Relative pointers
+### Image-relative pointers
 
-Relative pointers are really offsets relative to the image base. Assuming a
-standard Mach-O image base of 4 GB (`0x100000000`), the relative pointer
-`0x25207` is equivalent to `0x100025207`. Relative pointers can be combined with
-some of the other pointer types detailed below.
+**Image-relative pointers** are really offsets relative to the image base.
+Assuming a standard Mach-O image base of 4 GB (`0x100000000`), the
+image-relative pointer `0x25207` is equivalent to `0x100025207`. Image-relative
+pointers can be combined with some of the other pointer types detailed below,
+e.g. a tagged pointer.
 
 ### Tagged pointers
 
-Tagged pointers&mdash;used in arm64(e) binaries&mdash;pointers that carry
+**Tagged pointers**&mdash;used in arm64(e) binaries&mdash;pointers that carry
 metadata with them in their upper bits. They look like the following:
 
 ```
@@ -63,31 +69,87 @@ against `0x7ffffffff`.
 ```
 
 This illustrates an important point: even after removing the metadata, the
-resulting pointer can be **absolute** or **relative**.
+resulting pointer can be **absolute** or **image-relative**.
 
 ### Fast pointers
 
-TODO
+Coming soon.
 
 ## Types and structures
 
-TODO
+Coming soon.
 
 ### Class metadata
 
-TODO
+Coming soon.
 
 ### Classes
 
-TODO
+Coming soon.
 
 ### Method lists
 
-TODO
+**Method lists** are found in the `__objc_const` section on x86_64, or under
+`__objc_methlist` section under arm64(e). Method lists describe all of the base
+methods associated with a class.
 
-#### Entry types
+#### Header
 
-TODO
+A method list begins with a **method list header**, which has the following
+format:
+
+```c
+struct objc_method_list_t {
+    uint32_t size_and_flags;
+    uint32_t count;
+};
+```
+
+The `size_and_flags` field tells the size of the each entry, and optionally has
+flags in high bits. Flags can be isolated by performing a bitwise AND of the
+`size_and_flags` field with `0xffff0000`. The following flags may be present in
+the `size_and_flags` field:
+
+| Flag                   | Value        |
+|------------------------|--------------|
+| `HAS_RELATIVE_OFFSETS` | `0x80000000` |
+| `HAS_DIRECT_SELECTORS` | `0x40000000` |
+
+The `HAS_RELATIVE_OFFSETS` flag tells whether the pointers in the method list's
+entries should be treated as absolute pointers or relative offsets (explained in
+more detail below).
+
+The `HAS_DIRECT_SELECTORS` flag tells what the name/selector field in this
+method lists's entries points to. If the flag is set, the field points directly
+to a string; if the flag is unset, it points to a selector reference.
+
+#### Entries
+
+After a method list's header comes one or more **entries**. Entries can come in
+either of the following forms:
+
+```c
+struct objc_method_t {
+    void* name;
+    void* types;
+    void* imp;
+};
+
+struct objc_method_entry_t {
+    int32_t name;
+    int32_t types;
+    int32_t imp;
+};
+```
+
+The former entry layout (hereafter the "legacy" format) is older and is
+primarily used on x86_64. The latter format (hereafter the "modern" format) is
+newer and is used on arm64(e).
+
+The modern format always utilizes **relative offsets**&mdash;not to be confused
+with image-relative pointers&mdash;to point to its associated data. These
+offsets are to be interpreted as offsets from the structure member's absolute
+position in memory.
 
 ## Further reading
 
