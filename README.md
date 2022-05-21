@@ -128,13 +128,49 @@ pointer, which points to the structure's base:
 
 Coming soon.
 
-### Class metadata
-
-Coming soon.
-
 ### Classes
 
-Coming soon.
+**Class** structures are defined in the `__objc_data` section and are the basis
+for how classes are stored inside the binary. Class structures have the
+following layout:
+
+```c
+struct objc_class_t {
+    const void* isa;
+    const objc_class_t* super;   /* Superclass' `objc_class_t` structure */
+    void* cache;                 /* Commonly `nullptr` */
+    void* vtable;                /* Commonly `nullptr` */
+    const objc_class_ro_t* data; /* Associated class RO structure */
+};
+```
+
+> Any of the members which are pointers may be tagged or image-relative. The
+> `data` member may be a fast pointer.
+
+### Class RO
+
+**Class RO** (read-only) structures are defined inside of the `__objc_const`
+section. Most of the "interesting" information about classes&mdash;such as name,
+methods, or instance variables&mdash;is stored in class RO structures. The
+layout of class RO structures is as follows:
+
+```c
+struct objc_class_ro_t {
+    uint32_t flags;             /* Flags */
+    uint32_t start;
+    uint32_t size;
+    uint32_t reserved;          /* Reserved for future use */
+    const void* ivar_layout;
+    const void* name;           /* Class name */
+    const void* methods;        /* Base method list */
+    const void* protocols;
+    const void* vars;
+    const void* weak_ivar_layout;
+    const void* properties;
+};
+```
+
+> Any of the members which are pointers may be tagged or image-relative.
 
 ### Method lists
 
@@ -149,8 +185,8 @@ format:
 
 ```c
 struct objc_method_list_t {
-    uint32_t size_and_flags;
-    uint32_t count;
+    uint32_t size_and_flags;    /* Entry size and flags */
+    uint32_t count;             /* Number of entries */
 };
 ```
 
@@ -179,15 +215,15 @@ either of the following forms:
 
 ```c
 struct objc_method_t {
-    void* name;
-    void* types;
-    void* imp;
+    void* name;                 /* Pointer to name (or selector reference?) */
+    void* types;                /* Pointer to type info */
+    void* imp;                  /* Pointer to implementation (code) */
 };
 
 struct objc_method_entry_t {
-    int32_t name;
-    int32_t types;
-    int32_t imp;
+    int32_t name;               /* Relative offset to name or selector reference */
+    int32_t types;              /* Relative offset to type info */
+    int32_t imp;                /* Relative offset to implementation (code) */
 };
 ```
 
