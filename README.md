@@ -6,9 +6,9 @@ just my personal observations and notes. It is likely that there are errors
 and/or misunderstandings. Pull requests with corrections or new knowledge are
 encouraged.
 
-NOTE: In examples where structures/types are shown, some fields have been
-renamed to more clearly indicate their purpose; field names shown do not always
-match Objective-C's source code or their canonical names.
+NOTE: In examples where structures/types are shown, some names have been
+modified for clarity. Structure and member names shown do not always match
+Objective-C's source code or their canonical names.
 
 ## Pointer types
 
