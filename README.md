@@ -215,7 +215,7 @@ Entries may have either of the following layouts:
 ```c
 struct method_t {
     void* name;                 /* Pointer to name (or selector reference?) */
-    void* types;                /* Pointer to type info */
+    const char* types;          /* Pointer to type info */
     void* imp;                  /* Pointer to implementation (code) */
 };
 
