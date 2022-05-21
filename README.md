@@ -98,8 +98,7 @@ However, if we dereferenced this pointer as is, we would be (incorrectly)
 pointing into the middle of the following structure:
 
 ```
-100096d60 struct objc_class_ro_t ro__TtC7Console21ReportsViewController =
-100096d60 {
+100096d60 struct class_ro_t ro__TtC7Console21ReportsViewController = {
 100096d60     uint32_t flags = 0x184
 100096d64     uint32_t start = 0x48
 100096d68     uint32_t size = 0x68
@@ -135,12 +134,12 @@ for how classes are stored inside the binary. Class structures have the
 following layout:
 
 ```c
-struct objc_class_t {
+struct class_t {
     const void* isa;
-    const objc_class_t* super;   /* Superclass' `objc_class_t` structure */
-    void* cache;                 /* Commonly `nullptr` */
-    void* vtable;                /* Commonly `nullptr` */
-    const objc_class_ro_t* data; /* Associated class RO structure */
+    const class_t* super;       /* Superclass' `class_t` structure */
+    void* cache;                /* Commonly `nullptr` */
+    void* vtable;               /* Commonly `nullptr` */
+    const class_ro_t* data;     /* Associated class RO structure */
 };
 ```
 
@@ -155,14 +154,14 @@ methods, or instance variables&mdash;is stored in class RO structures. The
 layout of class RO structures is as follows:
 
 ```c
-struct objc_class_ro_t {
+struct class_ro_t {
     uint32_t flags;             /* Flags */
     uint32_t start;
     uint32_t size;
     uint32_t reserved;          /* Reserved for future use */
     const void* ivar_layout;
-    const void* name;           /* Class name */
-    const void* methods;        /* Base method list */
+    const char* name;             /* Class name */
+    const method_list_t* methods; /* Base method list */
     const void* protocols;
     const void* vars;
     const void* weak_ivar_layout;
@@ -184,7 +183,7 @@ A method list begins with a **method list header**, which has the following
 format:
 
 ```c
-struct objc_method_list_t {
+struct method_list_t {
     uint32_t size_and_flags;    /* Entry size and flags */
     uint32_t count;             /* Number of entries */
 };
@@ -210,17 +209,17 @@ to a string; if the flag is unset, it points to a selector reference.
 
 #### Entries
 
-After a method list's header comes one or more **entries**. Entries can come in
-either of the following forms:
+Immediately following the method list's header comes one or more **entries**.
+Entries may have either of the following layouts:
 
 ```c
-struct objc_method_t {
+struct method_t {
     void* name;                 /* Pointer to name (or selector reference?) */
     void* types;                /* Pointer to type info */
     void* imp;                  /* Pointer to implementation (code) */
 };
 
-struct objc_method_entry_t {
+struct method_entry_t {
     int32_t name;               /* Relative offset to name or selector reference */
     int32_t types;              /* Relative offset to type info */
     int32_t imp;                /* Relative offset to implementation (code) */
