@@ -97,7 +97,7 @@ the image base, the resulting pointer is produced:
 However, if we dereferenced this pointer as is, we would be (incorrectly)
 pointing into the middle of the following structure:
 
-```
+```c
 100096d60 struct class_ro_t ro__TtC7Console21ReportsViewController = {
 100096d60     uint32_t flags = 0x184
 100096d64     uint32_t start = 0x48
@@ -125,7 +125,10 @@ pointer, which points to the structure's base:
 
 ## Types and structures
 
-Coming soon.
+This section details structures used by the Objective-C ABI. The structure
+layouts shown in the following subsections represent how structures are laid out
+_at rest_, i.e. in a binary, not necessarily how they are laid out in memory at
+runtime.
 
 ### Classes
 
@@ -214,7 +217,7 @@ Entries may have either of the following layouts:
 
 ```c
 struct method_t {
-    void* name;                 /* Pointer to name (or selector reference?) */
+    const char* name;           /* Pointer to name (or selector reference?) */
     const char* types;          /* Pointer to type info */
     void* imp;                  /* Pointer to implementation (code) */
 };
@@ -234,6 +237,38 @@ The modern format always utilizes **relative offsets**&mdash;not to be confused
 with image-relative pointers&mdash;to point to its associated data. These
 offsets are to be interpreted as offsets from the structure member's absolute
 position in memory.
+
+To illustrate the difference between the two formats, have a look at the method
+list for the `BitFieldBox` in macOS 12's Calculator.app. Below is an excerpt of
+the method list from the x86_64 slice, which uses the legacy format:
+
+```c
+100028198 struct method_list_t ml_BitFieldBox = {
+100028198     uint32_t size_and_flags = 0x18 /* No flags; 24-byte entries */
+10002819c     uint32_t count = 0x4           /* 4 methods (only 1 shown here) */
+1000281a0 }
+1000281a0 struct method_t mt_initWithFrame_ = {
+1000281a0     const char* name = 0x10001c6e8  /* &"initWithFrame:" */
+1000281a8     const char* types = 0x1000214c5 /* &"@48@0:8{CGRect={CGPoint=dd}{CGSize=dd}}16" */
+1000281b0     void* imp = 0x100006829	      /* [BitFieldBox initWithFrame:] */
+1000281b8 }
+```
+
+In comparison, here is an excerpt of the same method list in the arm64e slice of
+the binary:
+
+```c
+10001f3b0  struct method_list_t ml_BitFieldBox = {
+10001f3b0      uint32_t size_and_flags = 0x8000000c /* HAS_RELATIVE_OFFSETS; 12-byte entries */
+10001f3b4      uint32_t count = 0x4                 /* 4 entries (only 1 shown here) */
+10001f3b8  }
+10001f3b8  struct method_entry_t mt_initWithFrame_ = {
+10001f3b8      int32_t name = 0x12498 /* 0x100031850 = &&"initWithFrame:" */
+10001f3bc      int32_t types = 0x6165 /* 0x100025521 = &"@48@0:8{CGRect={CGPoint=dd}{CGSize=dd}}16" */
+10001f3c0      int32_t imp = -0x16d34 /* 0x10000868c = [BitFieldBox initWithFrame:] */
+10001f3c4  }
+```
+
 
 ## Further reading
 
