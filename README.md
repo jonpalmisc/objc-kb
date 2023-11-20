@@ -1,5 +1,13 @@
 # Objective-C ABI Knowledge Base
 
+_**2023 Update:** I am also not actively working on projects related to
+Objective-C anymore, and this document has not been updated in quite some
+time. Some of the terminology here, etc. has always been wrong; other parts
+have aged out since it was written. Some portions of this document remain
+accurate, but in general, it would be wise to verify any claims made below._
+
+---
+
 This repository is meant to serve as a continuously-growing knowledge base
 regarding the Objective-C ABI. It is a **work in progress** and is currently
 just my personal observations and notes. It is likely that there are errors
